@@ -1,0 +1,5 @@
+Example run: 
+$ gcc test.cpp -lstdc++ -o test
+$ ./test
+
+This will run whatever code test.cpp is supposed to run
