@@ -6,6 +6,12 @@ using namespace std;
 
 
 int main() {
-    std::cout << "Hello World!" << endl;
+    
+    int x = 1;
+    int y = 3;
+    double z = x+y;
+
+    cout << z << endl;
+
     return 0;
 }
