@@ -1,21 +1,30 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
+#include <cmath>
 using namespace std;
 
 //TODO:
 // Ways to score best target
 // Able to change hard-coded 3 teams into a dynamic # of teams?
 // Have the player run away from groups of enemy players vs just a single one
+// Add a better fxn for changing teams
 
+
+//Make a class for players instead of having a vector in a vector]
+//Velocity
+
+//Class of a game state?
 
 //Global vars:
 int player_count; //# of players
 vector<vector<int>> players; //Vector containing coordinates of all players. First number indicates type status
 
+
+
 //Hard coded min & max values for size of arena (square), as well as dimensions
-int min_cord = 0;
-int max_cord = 1000; 
+int constexpr min_cord = 0;
+int constexpr max_cord = 1000; 
 int arena_dim = 2;
 
 
@@ -57,16 +66,15 @@ int main(){
 }
 
 
-void place_players(){
+void place_players(){ //Name this initialize_game?
 
-    if (player_count%3 == 1){
-        player_count += 2;
-    }
-    else if (player_count%3 == 2){
-        player_count++;
-    }
+    playercount += playcount%3;
 
     int team_size = player_count/3;
+
+
+    // TODO: Instead of initializing and then changing, just pushback when we randomize their coords.  
+    // Look into enums (enumerators)
 
     //Rock
     for (int i = 0; i < team_size; i++){
@@ -76,6 +84,7 @@ void place_players(){
 
         }
     }
+
 
     //Paper
     for (int i = team_size; i < 2*team_size; i++){
@@ -100,25 +109,32 @@ void place_players(){
 }
 
 // Checks every single player's distance from current player and returns the closest
-void move(const int player_numb, bool* close_enough){
+void move(const int player_numb, bool &close_enough){ //Distance field is better?
 
-    float sum_squares = 0;
-    float smallest_dist = max_cord*sqrt(2);
+    
+    float smallest_dist = max_cord*sqrt(2); //Hard code sqrt(2)?
 
     int closest_player;
 
     for (int i = 0; i < player_count; i++){
+
+        float sum_squares = 0;
+        
         if (i != player_numb){
             for (int j = 1; j <= arena_dim; j++){
                 sum_squares = pow((players[i][j] - players[player_numb][j]),2);
             }
 
             if (sqrt(sum_squares) < smallest_dist){
-                if(sum_squares < 1)
                 
-                *close_enough = 1;
+                
+                close_enough = 1;
                 closest_player = i;
             }
+
+            if(sum_squares < 1){
+                    //Changes state
+                }
         }
     }
 
