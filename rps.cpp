@@ -68,7 +68,7 @@ int main(){
 
 void place_players(){ //Name this initialize_game?
 
-    playercount += playcount%3;
+    player_count += player_count%3;
 
     int team_size = player_count/3;
 
@@ -164,4 +164,4 @@ bool game_end_check(){
 
 // USE THIS: for (std::vector<int>::iterator it = myvector.begin() ; it != myvector.end(); ++it)
 // turned to: for(vector<int>::iterator it = myvector.rbegin(); it != myvector.rend(); ++it)
-// Remember that it is a point (I think?), have to use *it to get the value at the iterator
+// Remember that it is a pointer (I think?), have to use *it to get the value at the iterator

@@ -3,3 +3,15 @@ $ gcc test.cpp -lstdc++ -o test
 $ ./test
 
 This will run whatever code test.cpp is supposed to run
+--Need to add -lm to get sqrt fxn working (library reasons ig)
+
+
+
+Open terminal: ctrl + `
+
+
+Constructors of a class are method fxns named the same thing the class is
+
+"every class has an auto generated default constructor (assuming every member in the class has a default constructor or is a primitive)
+once you create a constructor with arguments, the default is deleted
+you can either then define the default constructor yourself" - Nick Muia (7-13-23)
