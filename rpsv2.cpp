@@ -2,11 +2,15 @@
 #include <vector>
 #include <time.h>
 #include <cmath>
+#include <ncurses.h>
+#include <unistd.h>
+
 using namespace std;
 
 #define ROCK 0
 #define PAPER 1
 #define SCISSORS 2
+
 
 class Player {       // The class
     public:
@@ -49,7 +53,6 @@ int Player::get_team(){
 
 void Player::assign_team(int team_name){
     team = team_name;
-    return;
 }
 
 void Player::move_position(vector<float> move_vect, int arena_size){
@@ -65,9 +68,6 @@ void Player::move_position(vector<float> move_vect, int arena_size){
             position[i] = static_cast<float>(arena_size);
         }
     } 
-
-
-    return;
 }
 
 
@@ -79,20 +79,30 @@ vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, in
 float distance_ab(Player &a, Player &b, int arena_dim, int numb_of_teams);
 void a_tagged_b(Player &a, Player &b, int numb_of_teams);
 
-
-
-
 bool sim_end_check(int player_count, vector<Player> player_vect);
+
+string team_to_string(int team);
+
+void draw_game(vector<Player> &player_vect, int arena_size);
+
+void on_end(){
+    endwin(); // Calls the fxn in the argument when the program ends (nonspecific to ncurses)
+}
 
 
 int main(){
 
+    initscr(); // ncurses
+    curs_set(0); //Makes so that the curser isn't visible in render
+    refresh(); //Clears screen
+    atexit(&on_end); 
+
     srand(time(0));
 
-    int player_count = 30; //Hard coded now, but want to make this dynamic later
+    int player_count = 12; //Hard coded now, but want to make this dynamic later
     int numb_of_teams = 3; // Dido above ^^^
     int arena_dim = 2; //Dido above
-    int arena_size = 1000; //Dido above
+    int arena_size = 50; //Dido above
 
     player_count += player_count%numb_of_teams; // Makes sure team sizes are equal
 
@@ -113,23 +123,30 @@ int main(){
         // }
 
         for (int i = 0; i < player_count; i++){
-            cout << "Player" << i <<": "; 
+            //cout << "Player" << i <<": "; 
             for (int j = 0; j < arena_dim; j++){
-                cout << player_vect[i].get_position()[j] << ", ";
+                //cout << player_vect[i].get_position()[j] << ", ";
             } 
-                cout << endl;
+                //cout << endl;
 
             vector<float> move_vector = get_move_vector(i, player_vect, player_count, arena_dim, numb_of_teams);
             player_vect[i].move_position(move_vector, arena_size);
 
         }
-        cout << "=====: " << frame_counter << endl;
+
+        draw_game(player_vect, arena_size);
+        usleep(1e5); //Pauses in microseconds
+
+        // if (frame_counter%5000 == 0)
+        //     cout << "=====: " << frame_counter << endl;
 
         
 
     }
 
-    cout << player_vect[0].get_team() << " Won!" << endl;
+    endwin();
+
+    cout << team_to_string(player_vect[0].get_team()) << " Won!" << endl;
 
 
     return 0;
@@ -157,11 +174,12 @@ vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, in
                         movement_vector[i] = player_pos[i] - other_pos[i]; //Moves away from other player
                     }
 
-                    movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
+                    //movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
                     
-                    // while (movement_vector[i] > 5){
-                    //     movement_vector[i] -= 5;
-                    // }
+                     if(movement_vector[i] > 2){
+                         movement_vector[i] = 2;
+                     }
+                    
                     
                     //movement_vector[i] /= 10;
                 }
@@ -207,8 +225,6 @@ void a_tagged_b(Player &a, Player &b, int numb_of_teams){
 
     }
     
-    
-    return;
 }
 
 
@@ -228,19 +244,41 @@ bool sim_end_check(int player_count, vector<Player> player_vect){
 
 
 
+string team_to_string(int team){
+
+    string winner_str;
+
+    switch (team){
+        case 0:
+        winner_str = "Rock";
+        break;
+
+        case 1:
+        winner_str = "Paper";
+        break;
+        
+        case 2:
+        winner_str = "Scissors";
+        break;
+    }
+
+    return winner_str;
+}
 
 
+void draw_game(vector<Player> &player_vect, int arena_size){
+
+     
+
+    erase(); //Clears last screen
+
+    for (size_t i = 0; i < player_vect.size(); i++){ // Look into size_t's & range-based for loops
+        
+        mvaddch(static_cast<float>(arena_size) - player_vect[i].get_position()[1], player_vect[i].get_position()[0], team_to_string(player_vect[i].get_team())[0]);
+
+    } 
+
+    refresh();
+}
 
 
-
-
-
-
-
-
-
-
-
-int constexpr min_cord = 0;
-int constexpr max_cord = 1000; 
-int arena_dim = 2;
