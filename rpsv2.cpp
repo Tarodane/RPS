@@ -17,10 +17,10 @@ class Player {       // The class
 
 
         //Methods
-        Player(int numb_of_teams, int arena_dim, int arena_size);
-
         vector<float> get_position();
         int get_team();     
+
+        void set_position(int arena_dim, int arena_size);
 
         void assign_team(int team_name);
         void move_position(vector<float> move_vect, int arena_size);
@@ -31,7 +31,7 @@ class Player {       // The class
 
 
 // Method/function definition outside the class
-Player::Player(int numb_of_teams, int arena_dim, int arena_size) {
+void Player::set_position(int arena_dim, int arena_size) {
 
     for (int i = 0; i < arena_dim; i++){
         position.push_back(rand()%arena_size);
@@ -54,10 +54,10 @@ void Player::assign_team(int team_name){
 
 void Player::move_position(vector<float> move_vect, int arena_size){
     
-    position = move_vect;
-
-    //Makes sure we stay within bounds of the arena
     for (int i = 0; i < position.size(); i++){ 
+        position[i] += move_vect[i];
+
+        //Makes sure we stay within bounds of the arena
         if (position[i] < 0){
             position[i] = 0;
         }
@@ -96,8 +96,9 @@ int main(){
 
     player_count += player_count%numb_of_teams; // Makes sure team sizes are equal
 
-    vector<Player> player_vect = vector<Player>(player_count, Player(numb_of_teams, arena_dim, arena_size));
+    vector<Player> player_vect = vector<Player>(player_count);
     for (int i = 0; i < player_count; i++){
+        player_vect[i].set_position(arena_dim, arena_size);
         player_vect[i].assign_team(i%numb_of_teams);
     }
 
@@ -107,7 +108,7 @@ int main(){
         for (int i = 0; i < player_count; i++){
             cout << "Player" << i <<": "; 
             for (int j = 0; j < arena_dim; j++){
-                cout << player_vect[i].get_position()[i] << ", ";
+                cout << player_vect[i].get_position()[j] << ", ";
             } 
                 cout << endl;
 
@@ -136,8 +137,6 @@ vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int
             vector<float> player_pos = player_vect[moving_player].get_position();
             vector<float> other_pos = player_vect[other_player].get_position();
             for (int i = 0; i < arena_dim; i++){
-            
-                float distance = distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams);
                 
                 if(distance != 0){
 
@@ -148,7 +147,8 @@ vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int
                         movement_vector[i] = player_pos[i] - other_pos[i]; //Moves away from other player
                     }
 
-                    movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
+                    //movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
+                    movement_vector[i] /= 10;
                 }
             }
         }
@@ -164,7 +164,7 @@ float distance_ab(Player a, Player b, int arena_dim, int numb_of_teams){
     float sum_squares = 0;
 
     for (int i = 0; i < arena_dim; i++){
-        sum_squares = pow(pos_b[i] - pos_a[i],2); //Hate how I'm not using an iterator here but what else is a man to do when looking at two vectors
+        sum_squares += pow(pos_b[i] - pos_a[i],2); //Hate how I'm not using an iterator here but what else is a man to do when looking at two vectors
     } 
 
     float distance = sqrtf(sum_squares);
@@ -173,6 +173,7 @@ float distance_ab(Player a, Player b, int arena_dim, int numb_of_teams){
         a_tagged_b(a, b, numb_of_teams);
     }
 
+    cout << distance << endl;
     return distance;
 
 }
@@ -183,11 +184,18 @@ void a_tagged_b(Player a, Player b, int numb_of_teams){
     int a_team = a.get_team();
     int b_team = b.get_team();
 
-    if((a_team-1)%numb_of_teams == b_team){
-        a.assign_team(b_team);
-    }
-    else if((a_team+1)%numb_of_teams == b_team){
+    if((a_team-1)%numb_of_teams == b_team){ //Teams beat those whose teams are immediately below them
         b.assign_team(a_team);
+    }
+    else if((a_team+1)%numb_of_teams == b_team){ //Teams lose to the teams immediately above them
+
+        cout << a.get_team() << endl;
+        cout << b.get_team() << endl;
+
+        a.assign_team(b_team);
+
+        cout << a.get_team() << endl;
+        cout << b.get_team() << endl;
     }
     
     
