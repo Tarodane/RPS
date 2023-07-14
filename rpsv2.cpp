@@ -74,10 +74,10 @@ void Player::move_position(vector<float> move_vect, int arena_size){
 //Global Fxns
 
 
-vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int player_count, int arena_dim, int numb_of_teams);
+vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, int player_count, int arena_dim, int numb_of_teams);
 
-float distance_ab(Player a, Player b, int arena_dim, int numb_of_teams);
-void a_tagged_b(Player a, Player b, int numb_of_teams);
+float distance_ab(Player &a, Player &b, int arena_dim, int numb_of_teams);
+void a_tagged_b(Player &a, Player &b, int numb_of_teams);
 
 
 
@@ -89,7 +89,7 @@ int main(){
 
     srand(time(0));
 
-    int player_count = 3; //Hard coded now, but want to make this dynamic later
+    int player_count = 30; //Hard coded now, but want to make this dynamic later
     int numb_of_teams = 3; // Dido above ^^^
     int arena_dim = 2; //Dido above
     int arena_size = 1000; //Dido above
@@ -103,7 +103,14 @@ int main(){
     }
 
 
+    int frame_counter = 0;
+
     while(!sim_end_check(player_count, player_vect)){
+
+        frame_counter += 1;
+        // if (frame_counter > 2000){
+        //     return 0;
+        // }
 
         for (int i = 0; i < player_count; i++){
             cout << "Player" << i <<": "; 
@@ -116,10 +123,13 @@ int main(){
             player_vect[i].move_position(move_vector, arena_size);
 
         }
+        cout << "=====: " << frame_counter << endl;
+
+        
 
     }
 
-    cout << player_vect[0].get_team() << "Won!" << endl;
+    cout << player_vect[0].get_team() << " Won!" << endl;
 
 
     return 0;
@@ -127,7 +137,7 @@ int main(){
 
 
 
-vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int player_count, int arena_dim, int numb_of_teams){ //Should I be passing by reference to save on space?
+vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, int player_count, int arena_dim, int numb_of_teams){ //Should I be passing by reference to save on space?
     
     vector<float> movement_vector = vector<float>(arena_dim, 0); 
 
@@ -140,15 +150,20 @@ vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int
                 
                 if(distance != 0){
 
-                    if ((player_vect[moving_player].get_team() - 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams beat those whose teams are immediately below them
+                    if ((player_vect[moving_player].get_team() + numb_of_teams - 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams beat those whose teams are immediately below them
                         movement_vector[i] = other_pos[i] - player_pos[i]; //Moves towards other player
                     }
                     else if ((player_vect[moving_player].get_team() + 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams lose to the teams immediately above them
                         movement_vector[i] = player_pos[i] - other_pos[i]; //Moves away from other player
                     }
 
-                    //movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
-                    movement_vector[i] /= 10;
+                    movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
+                    
+                    // while (movement_vector[i] > 5){
+                    //     movement_vector[i] -= 5;
+                    // }
+                    
+                    //movement_vector[i] /= 10;
                 }
             }
         }
@@ -157,7 +172,7 @@ vector<float> get_move_vector(int moving_player, vector<Player> player_vect, int
 }
 
 
-float distance_ab(Player a, Player b, int arena_dim, int numb_of_teams){
+float distance_ab(Player &a, Player &b, int arena_dim, int numb_of_teams){
     vector<float> pos_a = a.get_position();
     vector<float> pos_b = b.get_position();
 
@@ -173,13 +188,12 @@ float distance_ab(Player a, Player b, int arena_dim, int numb_of_teams){
         a_tagged_b(a, b, numb_of_teams);
     }
 
-    cout << distance << endl;
     return distance;
 
 }
 
 
-void a_tagged_b(Player a, Player b, int numb_of_teams){
+void a_tagged_b(Player &a, Player &b, int numb_of_teams){
 
     int a_team = a.get_team();
     int b_team = b.get_team();
@@ -189,15 +203,9 @@ void a_tagged_b(Player a, Player b, int numb_of_teams){
     }
     else if((a_team+1)%numb_of_teams == b_team){ //Teams lose to the teams immediately above them
 
-        cout << a.get_team() << endl;
-        cout << b.get_team() << endl;
-
         a.assign_team(b_team);
 
-        cout << a.get_team() << endl;
-        cout << b.get_team() << endl;
     }
-    
     
     
     return;
