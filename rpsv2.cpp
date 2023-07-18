@@ -85,6 +85,11 @@ string team_to_string(int team);
 
 void draw_game(vector<Player> &player_vect, int arena_size);
 
+
+float min_float(float a, float b);
+float max_float(float a, float b);
+float parity_float(float a);
+
 void on_end(){
     endwin(); // Calls the fxn in the argument when the program ends (nonspecific to ncurses)
 }
@@ -154,10 +159,44 @@ int main(){
 
 
 
-vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, int player_count, int arena_dim, int numb_of_teams){ //Should I be passing by reference to save on space?
+// vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, int player_count, int arena_dim, int numb_of_teams){ //Should I be passing by reference to save on space?
     
-    vector<float> movement_vector = vector<float>(arena_dim, 0); 
+//     vector<float> movement_vector = vector<float>(arena_dim, 0); 
 
+//     for (int other_player = 0; other_player < player_count; other_player++){
+//         if (other_player != moving_player){
+//             float distance = distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams);
+//             vector<float> player_pos = player_vect[moving_player].get_position();
+//             vector<float> other_pos = player_vect[other_player].get_position();
+//             for (int i = 0; i < arena_dim; i++){
+                
+//                 if(distance != 0){
+
+//                     if ((player_vect[moving_player].get_team() + numb_of_teams - 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams beat those whose teams are immediately below them
+//                         movement_vector[i] = other_pos[i] - player_pos[i]; //Moves towards other player
+//                     }
+//                     else if ((player_vect[moving_player].get_team() + 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams lose to the teams immediately above them
+//                         movement_vector[i] = player_pos[i] - other_pos[i]; //Moves away from other player
+//                     }
+
+//                     movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
+                    
+//                     //  if(movement_vector[i] > 2){
+//                     //      movement_vector[i] = 2;
+//                     //  }
+                    
+                    
+//                     //movement_vector[i] /= 10;
+//                 }
+//             }
+//         }
+//     } 
+//     return movement_vector;
+// }
+
+vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, int player_count, int arena_dim, int numb_of_teams){
+
+    vector<float> movement_vector = vector<float>(arena_dim, 0); 
     for (int other_player = 0; other_player < player_count; other_player++){
         if (other_player != moving_player){
             float distance = distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams);
@@ -168,26 +207,39 @@ vector<float> get_move_vector(int moving_player, vector<Player> &player_vect, in
                 if(distance != 0){
 
                     if ((player_vect[moving_player].get_team() + numb_of_teams - 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams beat those whose teams are immediately below them
-                        movement_vector[i] = other_pos[i] - player_pos[i]; //Moves towards other player
+                        movement_vector[i] += min_float(.5 ,1/abs(other_pos[i] - player_pos[i])); //Moves towards other player
+                        movement_vector[i] *= parity_float(other_pos[i] - player_pos[i]);
                     }
                     else if ((player_vect[moving_player].get_team() + 1)%numb_of_teams == player_vect[other_player].get_team()){ //Teams lose to the teams immediately above them
-                        movement_vector[i] = player_pos[i] - other_pos[i]; //Moves away from other player
+                        movement_vector[i] += min_float(.5 ,1/abs(player_pos[i] - other_pos[i])); //Moves away from other player
+                        movement_vector[i] *= parity_float(other_pos[i] - player_pos[i]);
                     }
-
-                    //movement_vector[i] /= sqrtf(distance_ab(player_vect[moving_player], player_vect[other_player], arena_dim, numb_of_teams)); //Scales movement based on distance
-                    
-                     if(movement_vector[i] > 2){
-                         movement_vector[i] = 2;
-                     }
-                    
-                    
-                    //movement_vector[i] /= 10;
                 }
             }
         }
     } 
+
+    //Scales the vector down to a magnitude of 1
+    // float movement_vect_magnitude = 0;
+    // for (int i = 0; i < arena_dim; i++){
+    //     movement_vect_magnitude += pow(movement_vector[i], 2); 
+    // }
+    // movement_vect_magnitude = sqrt(movement_vect_magnitude);
+    // for (int i = 0; i < arena_dim; i++){
+    //     movement_vector[i] /= movement_vect_magnitude;
+    // }
+
+
     return movement_vector;
+
 }
+
+
+
+
+
+
+
 
 
 float distance_ab(Player &a, Player &b, int arena_dim, int numb_of_teams){
@@ -266,6 +318,40 @@ string team_to_string(int team){
 }
 
 
+float min_float(float a, float b){
+    if (a <= b){
+        return a;
+    }
+    else{
+        return b;
+    }
+
+}
+
+float max_float(float a, float b){
+    if (a >= b){
+        return a;
+    }
+    else{
+        return b;
+    }
+}
+
+float parity_float(float a){
+    if (a < 0){
+        return -1;
+    }
+    else if(a > 0){
+        return 1;
+    } 
+
+    return 0;
+}
+
+
+
+
+
 void draw_game(vector<Player> &player_vect, int arena_size){
 
      
@@ -280,5 +366,8 @@ void draw_game(vector<Player> &player_vect, int arena_size){
 
     refresh();
 }
+
+
+
 
 
